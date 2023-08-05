@@ -1,4 +1,7 @@
-[![PlatformIO CI](https://github.com/matthewturner/EventuallyCommand/actions/workflows/platformio.yml/badge.svg)](https://github.com/matthewturner/EventuallyCommand/actions/workflows/platformio.yml)
+[![PlatformIO CI](https://github.com/zskzskabcd/EventuallyCommand/actions/workflows/platformio.yml/badge.svg)](https://github.com/zskzskabcd/EventuallyCommand/actions/workflows/platformio.yml)
+
+forked from [matthewturner/EventuallyCommand](https://github.com/matthewturner/Eventually)
+Compared with matthewturner/EventuallyCommand, its data type is string, which is more convenient for data transmission and interaction, but it also requires more memory
 
 # Eventually - Command
 
@@ -18,10 +21,10 @@ Commands must start with **'>'** and end with **'!'**, eg:
 >update!
 ```
 
-Commands can optionally include an integer data element, separated by a colon:
+Commands can optionally include an string data element, separated by a colon:
 
 ```
->set:123!
+>set:hello!
 ```
 
 The data element will be passed into your registered EvtCommandAction callback.
@@ -62,7 +65,7 @@ At the top of your main.h (before the other headers), define the following:
 
 ```
 #define EVENTUALLY_COMMAND_BUFFER_LENGTH 20
-#define EVENTUALLY_DATA_BUFFER_LENGTH 20
+#define EVENTUALLY_DATA_BUFFER_LENGTH 64
 #include <EventuallyCommand.h>
 ```
 

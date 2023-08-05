@@ -1,3 +1,10 @@
+// define the data buffer length
+// This depends on the length of data you need. The larger
+// the value, the more memory it occupies, and the longer
+// the data can be received. You can adjust it according to
+// your needs and the memory size of the development board.
+#define EVENTUALLY_DATA_BUFFER_LENGTH 32
+
 #include <Eventually.h>
 #include <EventuallyCommand.h>
 
