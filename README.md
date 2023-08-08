@@ -59,17 +59,11 @@ At the top of your main.h (before the other headers), define EVENTUALLY_MAX_COMM
 #include <EventuallyCommand.h>
 ```
 
-## Increasing the length of the command/data buffers
+## ~~Increasing the length of the command/data buffers~~
 
-depredated, use String instead of char array
+deprecated, use String instead of char array
 
-At the top of your main.h (before the other headers), define the following:
-
-```
-#define EVENTUALLY_COMMAND_BUFFER_LENGTH 20
-#define EVENTUALLY_DATA_BUFFER_LENGTH 64
-#include <EventuallyCommand.h>
-```
+~~At the top of your main.h (before the other headers), define the following:~~
 
 ## Installing Platform IO
 
