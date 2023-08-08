@@ -6,13 +6,19 @@ EvtCommandListener::EvtCommandListener(Stream *stream, short readDelayMs)
   _readDelayMs = readDelayMs;
 }
 
-void EvtCommandListener::when(const char *command, EvtCommandAction action)
+void EvtCommandListener::when(const char *command, EvtCommandAction action, bool isLoop)
 {
   CommandAction commandAction;
   commandAction.Command = command;
   commandAction.Action = action;
+  commandAction.IsLoop = isLoop;
   _commands[_commandActionIndex] = commandAction;
   _commandActionIndex++;
+}
+
+void EvtCommandListener::whenever(const char *command, EvtCommandAction action)
+{
+  when(command, action, true);
 }
 
 bool EvtCommandListener::performTriggerAction(IEvtContext *ctx)
@@ -20,9 +26,15 @@ bool EvtCommandListener::performTriggerAction(IEvtContext *ctx)
   for (short i = 0; i < _commandActionIndex; i++)
   {
     CommandAction action = _commands[i];
-    if (strcmp(_commandBuffer, action.Command) == 0)
+    if (strcmp(action.Command, _commandBuffer.c_str()) == 0)
     {
-      return action.Action(this, ctx, _dataBuffer);
+      action.Action(this, ctx, _dataBuffer);
+      reset();
+      if (action.IsLoop)
+      {
+        return false;
+      }
+      return true;
     }
   }
 
@@ -41,8 +53,6 @@ bool EvtCommandListener::isEventTriggered()
 
 bool EvtCommandListener::tryReadCommand()
 {
-  _commandIndex = -1;
-  _dataIndex = -1;
   while (_stream->available())
   {
     delay(_readDelayMs);
@@ -50,28 +60,24 @@ bool EvtCommandListener::tryReadCommand()
     switch (ch)
     {
     case '>':
-      _commandIndex = 0;
+      _commandBuffer = "";
+      _currentStep = 1; // read command
       break;
     case ':':
-      _dataIndex = 0;
+      _dataBuffer = "";
+      _currentStep = 2; // read data
       break;
     case '!':
-      _commandBuffer[_commandIndex] = '\0';
-      _commandIndex++;
-      if (_dataIndex >= 0)
-      {
-        _dataBuffer[_dataIndex] = '\0';
-        _dataIndex++;
-      }
+      _currentStep = 0; // reset
       return true;
     default:
-      if (_dataIndex == -1)
+      if (_currentStep == 1)
       {
-        appendToCommandIfPossible(ch);
+        appendToCommand(ch);
       }
-      else
+      else if (_currentStep == 2)
       {
-        appendToDataIfPossible(ch);
+        appendToData(ch);
       }
       break;
     }
@@ -79,34 +85,19 @@ bool EvtCommandListener::tryReadCommand()
   return false;
 }
 
-void EvtCommandListener::appendToCommandIfPossible(char ch)
+void EvtCommandListener::appendToCommand(char ch)
 {
-  if (_commandIndex >= EVENTUALLY_COMMAND_BUFFER_LENGTH - 1)
-  {
-    _commandBuffer[EVENTUALLY_COMMAND_BUFFER_LENGTH - 1] = '\0';
-    _commandIndex++;
-  }
-  else
-  {
-    _commandBuffer[_commandIndex] = ch;
-    _commandIndex++;
-  }
+  _commandBuffer += (char)ch;
 }
 
-void EvtCommandListener::appendToDataIfPossible(char ch)
+void EvtCommandListener::appendToData(char ch)
 {
-  if (_dataIndex >= EVENTUALLY_DATA_BUFFER_LENGTH - 1)
-  {
-    _dataBuffer[EVENTUALLY_DATA_BUFFER_LENGTH - 1] = '\0';
-    _dataIndex++;
-  }
-  else
-  {
-    _dataBuffer[_dataIndex] = ch;
-    _dataIndex++;
-  }
+  _dataBuffer += (char)ch;
 }
 
 void EvtCommandListener::reset()
 {
+  _commandBuffer = "";
+  _dataBuffer = "";
+  _currentStep = 0;
 }

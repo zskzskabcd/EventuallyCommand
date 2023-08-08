@@ -19,7 +19,7 @@ void setup()
   Serial.begin(115200);
 
   commandListener.when("set", (EvtCommandAction)set);
-  commandListener.when("update", (EvtCommandAction)update);
+  commandListener.whenever("update", (EvtCommandAction)update);
 
   mgr.addListener(&commandListener);
 
@@ -27,7 +27,10 @@ void setup()
 }
 
 // serial will be checked on each loop
-USE_EVENTUALLY_LOOP(mgr)
+void loop()
+{
+  mgr.loopIteration();
+}
 
 // no need to specify EvtCommandAction arguments
 bool set()
@@ -39,7 +42,7 @@ bool set()
 }
 
 // unless you are interested in the data element
-bool update(EvtListener *, EvtContext *, long data)
+bool update(EvtListener *, EvtContext *, const String &data)
 {
   Serial.print("Updating with ");
   Serial.print(data);

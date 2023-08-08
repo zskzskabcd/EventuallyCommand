@@ -4,6 +4,6 @@
 class IEvtContext;
 class IEvtListener;
 
-typedef bool (*EvtCommandAction)(IEvtListener *, IEvtContext *, const char *);
+typedef bool (*EvtCommandAction)(IEvtListener *, IEvtContext *, const String &);
 
 #endif

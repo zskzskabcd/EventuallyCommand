@@ -1,7 +1,7 @@
 [![PlatformIO CI](https://github.com/zskzskabcd/EventuallyCommand/actions/workflows/platformio.yml/badge.svg)](https://github.com/zskzskabcd/EventuallyCommand/actions/workflows/platformio.yml)
 
 forked from [matthewturner/EventuallyCommand](https://github.com/matthewturner/Eventually)
-Compared with matthewturner/EventuallyCommand, its data type is string, which is more convenient for data transmission and interaction, but it also requires more memory
+Compared with matthewturner/EventuallyCommand, its data type is String, which is more convenient for data transmission and interaction, but it also requires more memory
 
 # Eventually - Command
 
@@ -43,8 +43,8 @@ void setup()
     mgr.addListener(new EvtPinListener(...));
 
     // register the command and the action to trigger
-    commandListener.when("update", (EvtCommandAction)update);
-    commandListener.when("set", (EvtCommandAction)set);
+    commandListener.when("update", (EvtCommandAction)update); // only trigger once
+    commandListener.whenever("set", (EvtCommandAction)set); // trigger every time
 
     mgr.addListener(&commandListener);
 }
@@ -60,6 +60,8 @@ At the top of your main.h (before the other headers), define EVENTUALLY_MAX_COMM
 ```
 
 ## Increasing the length of the command/data buffers
+
+depredated, use String instead of char array
 
 At the top of your main.h (before the other headers), define the following:
 

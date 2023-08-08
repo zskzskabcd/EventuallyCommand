@@ -25,10 +25,12 @@ void tearDown(void)
   delete target;
 }
 
-bool mockMethod(EvtListener *listener, EvtContext *ctx, const char *data)
+bool mockMethod(EvtListener *listener, EvtContext *ctx, const String &data)
 {
   _called = true;
-  _data = (char *)data;
+  // printf("mockMethod called with data: %s\n", data.c_str());
+  _data = (char *)malloc(data.length() + 1);
+  strcpy(_data, data.c_str());
   return true;
 }
 
@@ -273,21 +275,6 @@ void test_triggered_by_command_with_max_data_calls_action(void)
   TEST_ASSERT_EQUAL_STRING("1641092", _data);
 }
 
-void test_triggered_by_large_command_calls_truncated_command(void)
-{
-  When(Method(ArduinoFake(Stream), available)).Return(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0);
-  When(Method(ArduinoFake(Stream), read)).Return('>', 's', 'e', 't', 't', 'h', 'e', 'v', 'a', 'l', 'u', 'e', ':', '1', '6', '4', '1', '0', '9', '2', '4', '9', '4', '!');
-  stream = ArduinoFakeMock(Stream);
-  target = new EvtCommandListener(stream);
-
-  target->when("settheval", (EvtCommandAction)mockMethod);
-
-  target->isEventTriggered();
-  bool actual = target->performTriggerAction(&ctx);
-  TEST_ASSERT_TRUE(actual);
-  TEST_ASSERT_TRUE(_called);
-}
-
 void test_triggered_by_command_with_large_data(void)
 {
   When(Method(ArduinoFake(Stream), available)).Return(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0);
@@ -337,7 +324,6 @@ int main(int argc, char **argv)
   RUN_TEST(test_triggered_by_command_with_negative_data_calls_action);
   RUN_TEST(test_triggered_by_command_with_max_data);
   RUN_TEST(test_triggered_by_command_with_max_data_calls_action);
-  RUN_TEST(test_triggered_by_large_command_calls_truncated_command);
   RUN_TEST(test_triggered_by_command_with_large_data);
   RUN_TEST(test_triggered_by_command_with_large_data_calls_action_with_truncated_data);
   UNITY_END();

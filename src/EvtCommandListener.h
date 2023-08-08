@@ -12,17 +12,12 @@
 #ifndef EVENTUALLY_MAX_COMMANDS
 #define EVENTUALLY_MAX_COMMANDS 10
 #endif
-#ifndef EVENTUALLY_COMMAND_BUFFER_LENGTH
-#define EVENTUALLY_COMMAND_BUFFER_LENGTH 10
-#endif
-#ifndef EVENTUALLY_DATA_BUFFER_LENGTH
-#define EVENTUALLY_DATA_BUFFER_LENGTH 32
-#endif
 
 struct commandAction
 {
   EvtCommandAction Action;
   const char *Command;
+  bool IsLoop;
 } typedef CommandAction;
 
 class EvtCommandListener : public EvtListener
@@ -30,24 +25,31 @@ class EvtCommandListener : public EvtListener
 public:
   EvtCommandListener(Stream *stream, short readDelayMs = 5);
   bool tryReadCommand();
-  void when(const char *command, EvtCommandAction action);
+  /// @brief Register a command to be listened for. It will trigger only once.
+  /// @param command
+  /// @param action
+  /// @param isLoop If true, the command will trigger loop. which equals to whenever.
+  void when(const char *command, EvtCommandAction action, bool isLoop = false);
+  /// @brief Register a command to be listened for. It will trigger loop.
+  /// @param command
+  /// @param action
+  void whenever(const char *command, EvtCommandAction action);
 
   void reset();
   bool isEventTriggered();
   bool performTriggerAction(IEvtContext *ctx);
 
 private:
-  char _commandBuffer[EVENTUALLY_COMMAND_BUFFER_LENGTH];
-  char _dataBuffer[EVENTUALLY_DATA_BUFFER_LENGTH];
-  short _commandIndex = -1;
-  long _dataIndex = -1;
+  String _commandBuffer;
+  String _dataBuffer;
   Stream *_stream;
   short _commandActionIndex = 0;
+  short _currentStep = 0;
   unsigned long _readDelayMs;
   CommandAction _commands[EVENTUALLY_MAX_COMMANDS];
 
-  void appendToCommandIfPossible(char ch);
-  void appendToDataIfPossible(char ch);
+  void appendToCommand(char ch);
+  void appendToData(char ch);
 };
 
 #endif
